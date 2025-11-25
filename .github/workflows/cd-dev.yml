@@ -1,0 +1,38 @@
+name: Deploy to Development
+
+on:
+  push:
+    branches: [ develop ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: development
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Build and push Docker images
+      run: |
+        docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/learning-platform-backend:dev -f backend/Dockerfile ./backend
+        docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/learning-platform-frontend:dev -f frontend/Dockerfile ./frontend
+        echo ${{ secrets.DOCKERHUB_PASSWORD }} | docker login -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
+        docker push ${{ secrets.DOCKERHUB_USERNAME }}/learning-platform-backend:dev
+        docker push ${{ secrets.DOCKERHUB_USERNAME }}/learning-platform-frontend:dev
+
+    - name: Deploy to server
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        host: ${{ secrets.DEV_HOST }}
+        username: ${{ secrets.DEV_USER }}
+        key: ${{ secrets.DEV_SSH_KEY }}
+        port: ${{ secrets.DEV_SSH_PORT }}
+        script: |
+          cd /var/www/learning-platform
+          git fetch --all
+          git reset --hard origin/develop
+          docker-compose -f infra/docker-compose.dev.yml down
+          docker-compose -f infra/docker-compose.dev.yml pull
+          docker-compose -f infra/docker-compose.dev.yml up -d
+          docker system prune -f

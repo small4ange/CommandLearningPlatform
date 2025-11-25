@@ -1,0 +1,16 @@
+FROM python:3.11-slim
+
+WORKDIR /app
+
+# Копируем зависимости отдельно для кэширования
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Устанавливаем dev-зависимости если есть
+RUN pip install pytest pytest-cov black flake8
+
+# Копируем код
+COPY . .
+
+# Запускаем в режиме разработки с автоперезагрузкой
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
