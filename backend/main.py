@@ -10,9 +10,10 @@ models.Base.metadata.create_all(bind=engine)
 app = FastAPI(title="Educational Platform API")
 
 origins = [
-    "http://localhost:5173",  # Vite default dev server
-    "http://localhost:4173",  # Vite preview
-    "http://localhost:3000",  # Alternative frontend port
+    "http://localhost:5174",
+    "http://localhost:5173",
+    "http://localhost:4173",
+    "http://localhost:3000",
 ]
 
 app.add_middleware(
