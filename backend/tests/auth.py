@@ -4,7 +4,7 @@ from fastapi import status
 
 def test_register_success(client):
     """Test successful user registration"""
-    response = client.post(
+    response = client.post( # отправляем POST-запрос
         "/auth/register",
         json={
             "email": "newuser@test.com",
@@ -13,7 +13,7 @@ def test_register_success(client):
         }
     )
     
-    assert response.status_code == status.HTTP_200_OK
+    assert response.status_code == status.HTTP_200_OK # Проверяем, что сервер вернул статус 200 OK, что значит успешная регистрация
     data = response.json()
     assert "access_token" in data
     assert data["token_type"] == "bearer"
